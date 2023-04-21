@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors')
 const crypto = require('crypto');
 const pkg = require('./package.json');
-
+const jwt_decode = require("jwt-decode");
 
 // App constants
 const port = process.env.PORT || 3000;
@@ -45,7 +45,7 @@ const db = {
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors({ origin: [/http:\/\/(127(\.\d){3}|localhost)/,/https:\/\/.*?.azurewebsites.net/,/https:\/\/.*?.azure-api.net/]}));
+app.use(cors({ origin: [/http:\/\/(127(\.\d){3}|localhost)/,/https:\/\/.*?.azure-api.net/]}));
 app.options('*', cors());
 
 // ***************************************************************************
@@ -102,14 +102,19 @@ router.post('/accounts', (req, res) => {
 // Get all data for the specified account
 router.get('/accounts/:user', (req, res) => {
     const authHeader = req.headers.authorization;
-    const account = db[req.params.user];
-  
+    let account = db[req.params.user];
+
     // Check if account exists
     if (!account) {
       return res.status(404).json({ error: 'User does not exist' });
     }
+
+    if (authHeader){
+     token = jwt_decode(authHeader);
+     account = { token, ...account};
+    }
   
-    return res.json({account: account, authorization: authHeader});
+    return res.json(account);
   });
   
   // ----------------------------------------------
