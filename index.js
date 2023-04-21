@@ -101,6 +101,7 @@ router.post('/accounts', (req, res) => {
 
 // Get all data for the specified account
 router.get('/accounts/:user', (req, res) => {
+    const authHeader = req.headers.authorization;
     const account = db[req.params.user];
   
     // Check if account exists
@@ -108,7 +109,7 @@ router.get('/accounts/:user', (req, res) => {
       return res.status(404).json({ error: 'User does not exist' });
     }
   
-    return res.json(account);
+    return res.json({account: account, authorization: authHeader});
   });
   
   // ----------------------------------------------
